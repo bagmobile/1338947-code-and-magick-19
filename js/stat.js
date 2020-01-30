@@ -13,7 +13,7 @@
           }
         }
       }
-      return maxValue;
+      return Math.round(maxValue);
     };
 
     var cloud = {
@@ -36,65 +36,87 @@
     };
 
     var text = {
-      leftChordX: 130,
-      leftChordY: 40,
+      offsetX: 30,
+      offsetY: 30,
       textRows: ['Ура вы победили!', 'Список результатов:'],
       font: '16px PT Mono',
       color: 'black',
-      textRowHeight: 20,
+      rowHeight: 20,
       draw: function (canvas) {
         var self = this;
         this.textRows.forEach(function (value, index) {
           canvas.fillStyle = self.color;
           canvas.font = self.font;
-          canvas.fillText(value, self.leftChordX, self.leftChordY + index * self.textRowHeight);
+          canvas.fillText(value, cloud.leftChordX + self.offsetX, cloud.leftChordY + self.offsetY + index * self.rowHeight);
         });
       },
     };
 
     var chart = {
-      width: 420,
-      height: 150,
-      rowTextHeight: 20,
+      leftChordX: cloud.leftChordX,
+      leftChordY: cloud.leftChordY + text.offsetY + text.rowHeight * text.textRows.length,
+      chartHeight: 150,
+      rowTextHeight: 10,
       elementWidth: 40,
       elementOffsetWidth: 50,
-      padding: {top: 10, right: 10, bottom: 10, left: 10},
+      padding: {top: 10, right: 10, bottom: 10, left: 40},
       player: 'Вы',
       maxTimeValue: getMaxValue(times),
-      getLeftChordX: function (cloudData) {
-        return;
+      getElementLeftChordX: function (i) {
+        return this.leftChordX + this.padding.left + i * (this.elementWidth + this.elementOffsetWidth);
       },
-      getLeftChordY: function () {
-        return;
+      getElementLeftChordY: function () {
+        return this.leftChordY + this.padding.top;
       },
-      getElementLeftChordX: function (numberElement) {
-        return this.getLeftChordX() + numberElement * (this.elementWidth + this.elementOffsetWidth) + this.elementOffsetWidth;
+      getElementOffsetLeftChordY: function (timeValue) {
+        return Math.round(this.chartHeight - timeValue * this.chartHeight / this.maxTimeValue);
       },
-      getElementLeftChordY: function (timeValue) {
-        return this.getLeftChordY() + this.getHeight() - timeValue * this.getHeight() / this.maxTimeValue;
+      getFillStyleChartElement: function (isMyself) {
+        return isMyself ? 'rgba(255, 0, 0, 1)' : 'hsl(240, ' + Math.round(Math.floor(100)) + '%, ' + Math.floor(50) + '%)';
       },
-      drawElement: function (element) {
+      drawTextElement: function (canvas, textElement) {
+        canvas.fillStyle = textElement.fillStyle;
+        canvas.font = textElement.font;
+        canvas.fillText(textElement.text, textElement.leftChordX, textElement.leftChordY);
+      },
+      drawChartElement: function (canvas, element) {
+        canvas.fillStyle = element.fillStyle;
+        canvas.fillRect(element.leftChordX, element.leftChordY, element.width, element.height);
       },
       draw: function (canvas, listNames, listTimes) {
+        for (var i = 0; i < listNames.length; i++) {
+          var time = Math.round(listTimes[i]);
+          var offset = this.getElementOffsetLeftChordY(time);
 
+          this.drawTextElement(canvas, {
+            text: time,
+            fillStyle: 'black',
+            font: '16px PT Mono',
+            leftChordX: this.getElementLeftChordX(i),
+            leftChordY: this.getElementLeftChordY(),
+          });
+
+          this.drawChartElement(canvas, {
+            fillStyle: this.getFillStyleChartElement(listNames[i] === this.player),
+            leftChordX: this.getElementLeftChordX(i),
+            leftChordY: this.getElementLeftChordY() + this.rowTextHeight + offset,
+            width: this.elementWidth,
+            height: this.chartHeight - offset,
+          });
+
+          this.drawTextElement(canvas, {
+            text: listNames[i],
+            fillStyle: 'black',
+            font: '16px PT Mono',
+            leftChordX: this.getElementLeftChordX(i),
+            leftChordY: this.getElementLeftChordY() + 3 * this.rowTextHeight + this.chartHeight,
+          });
+        }
       },
-    };
-
-    var drawArea = function (area) {
-      for (var i = 0; i < names.length; i++) {
-        var time = Math.round(times[i]);
-        ctx.fillStyle = 'black';
-        ctx.fillText(String(time), area.getElementLeftChordX(i), area.getElementLeftChordY(times[i]));
-        ctx.fillStyle = (names[i] === area.playerYou) ? 'rgba(255, 0, 0, 1)' : 'rgba(0, 0, 255, 0.5)';
-        var elementLeftChordY = area.getElementLeftChordY(times[i]);
-        var elementHeight = cloudData.height - elementLeftChordY - area.rowNameHeight - area.rowTimeHeight;
-        ctx.fillRect(area.getElementLeftChordX(i), elementLeftChordY + area.rowTimeHeight, area.elementWidth, elementHeight);
-        ctx.fillStyle = 'black';
-        ctx.fillText(names[i], area.getElementLeftChordX(i), area.getElementLeftChordY(times[i]) + elementHeight + area.rowTimeHeight);
-      }
     };
 
     cloud.draw(ctx);
     text.draw(ctx);
+    chart.draw(ctx, names, times);
   };
 })();
