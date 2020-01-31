@@ -2,18 +2,23 @@
 
 window.renderStatistics = function (ctx, names, times) {
 
-  var leftChordX = 100,
-    leftChordY = 10,
-    width = 420,
-    height = 270,
-    chartLeftChordX = 100,
-    chartLeftChordY = 80,
-    chartHeight = 150,
-    chartRowTextHeight = 10,
-    chartElementWidth = 40,
-    chartElementOffsetWidth = 50,
-    chartPadding = {top: 10, right: 10, bottom: 10, left: 40},
-    player = 'Вы';
+  var Cloud = {
+    X: 100,
+    Y: 10,
+    WIDTH: 420,
+    HEIGHT: 270,
+    SHADOW_OFFSET: 10,
+  };
+  var Text = {
+    OFFSET: 30,
+    HEIGHT: 20,
+  };
+  var Chart = {
+    HEIGHT: 150,
+    ELEMENT_WIDTH: 40,
+    ELEMENT_OFFSET_WIDTH: 50,
+    PLAYER: 'Вы',
+  };
 
   var getMaxValue = function (data) {
     var maxValue = data[0];
@@ -27,89 +32,62 @@ window.renderStatistics = function (ctx, names, times) {
     return Math.round(maxValue);
   };
 
-  var maxTimeValue = getMaxValue(times);
-
   var drawCloud = function (canvas) {
-    var shadowOffset = 10;
     canvas.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    canvas.fillRect(leftChordX + shadowOffset, leftChordY + shadowOffset, width, height);
+    canvas.fillRect(Cloud.X + Cloud.SHADOW_OFFSET, Cloud.Y + Cloud.SHADOW_OFFSET, Cloud.WIDTH, Cloud.HEIGHT);
     canvas.fillStyle = 'white';
-    canvas.fillRect(leftChordX, leftChordY, width, height);
+    canvas.fillRect(Cloud.X, Cloud.Y, Cloud.WIDTH, Cloud.HEIGHT);
+  };
+
+  var drawTextElement = function (canvas, textElement) {
+    canvas.fillStyle = 'black';
+    canvas.font = '16px PT Mono';
+    canvas.fillText(textElement.text, textElement.leftChordX, textElement.leftChordY);
   };
 
   var drawText = function (canvas) {
-    var offsetX = 30;
-    var offsetY = 30;
     var textRows = ['Ура вы победили!', 'Список результатов:'];
-    var rowHeight = 20;
 
     textRows.forEach(function (value, index) {
-      canvas.fillStyle = 'black';
-      canvas.font = '16px PT Mono';
-      canvas.fillText(value, leftChordX + offsetX, leftChordY + offsetY + index * rowHeight);
+      drawTextElement(canvas, {
+        text: value,
+        leftChordX: Cloud.X + Text.OFFSET,
+        leftChordY: Cloud.Y + Text.OFFSET + index * Text.HEIGHT,
+      });
     });
-  };
-
-  var getElementOffsetLeftChordY = function (timeValue) {
-    return Math.round(chartHeight - timeValue * chartHeight / maxTimeValue);
   };
 
   var getFillStyleChartElement = function (isMyself) {
     return isMyself ? 'rgba(255, 0, 0, 1)' : 'hsl(240, ' + Math.round(Math.floor(100)) + '%, ' + Math.floor(50) + '%)';
   };
 
-  var getElementLeftChordX = function (i) {
-    return chartLeftChordX + chartPadding.left + i * (chartElementWidth + chartElementOffsetWidth);
-  };
-
-  var getElementLeftChordY = function () {
-    return chartLeftChordY + chartPadding.top;
-  };
-
-  var drawTextElement = function (canvas, textElement) {
-    canvas.fillStyle = textElement.fillStyle;
-    canvas.font = textElement.font;
-    canvas.fillText(textElement.text, textElement.leftChordX, textElement.leftChordY);
-  };
-
-  var drawChartElement = function (canvas, element) {
-    canvas.fillStyle = element.fillStyle;
-    canvas.fillRect(element.leftChordX, element.leftChordY, element.width, element.height);
-  };
-
   var drawChart = function (canvas, listNames, listTimes) {
+    var maxTimeValue = getMaxValue(times);
 
     for (var i = 0; i < listNames.length; i++) {
       var time = Math.round(listTimes[i]);
-      var offset = getElementOffsetLeftChordY(time);
+      var offset = Math.round(Chart.HEIGHT - Chart.HEIGHT * time / maxTimeValue);
+      var dataPlayer = [time, listNames[i]];
+      var chartElementLeftChordX = Cloud.X + Chart.ELEMENT_OFFSET_WIDTH + i * (Chart.ELEMENT_WIDTH + Chart.ELEMENT_OFFSET_WIDTH);
+      var chartElementLeftChordY = Cloud.Y + 2 * Text.HEIGHT + Text.OFFSET;
 
-      drawTextElement(canvas, {
-        text: time,
-        fillStyle: 'black',
-        font: '16px PT Mono',
-        leftChordX: getElementLeftChordX(i),
-        leftChordY: getElementLeftChordY(),
-      });
+      for (var j = 0; j <= dataPlayer.length - 1; j++) {
+        drawTextElement(canvas, {
+          text: dataPlayer[j],
+          leftChordX: chartElementLeftChordX,
+          leftChordY: chartElementLeftChordY + ((j === 1) ? (2 * Text.HEIGHT + Chart.HEIGHT) : offset + Text.HEIGHT / 2),
+        });
+      }
 
-      drawChartElement(canvas, {
-        fillStyle: getFillStyleChartElement(listNames[i] === player),
-        leftChordX: getElementLeftChordX(i),
-        leftChordY: getElementLeftChordY() + chartRowTextHeight + offset,
-        width: chartElementWidth,
-        height: chartHeight - offset,
-      });
-
-      drawTextElement(canvas, {
-        text: listNames[i],
-        fillStyle: 'black',
-        font: '16px PT Mono',
-        leftChordX: getElementLeftChordX(i),
-        leftChordY: getElementLeftChordY() + 3 * chartRowTextHeight + chartHeight,
-      });
+      canvas.fillStyle = getFillStyleChartElement(listNames[i] === Chart.PLAYER);
+      canvas.fillRect(chartElementLeftChordX, chartElementLeftChordY + Text.HEIGHT + offset,
+        Chart.ELEMENT_WIDTH, Chart.HEIGHT - offset);
     }
   };
 
-  drawCloud(ctx);
-  drawText(ctx);
-  drawChart(ctx, names, times);
+  if ((names.length !== 0) && times.length !== 0) {
+    drawCloud(ctx);
+    drawText(ctx);
+    drawChart(ctx, names, times);
+  }
 };
