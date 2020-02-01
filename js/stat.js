@@ -80,8 +80,7 @@ window.renderStatistics = function (ctx, names, times) {
       }
 
       canvas.fillStyle = getFillStyleChartElement(listNames[i] === Chart.PLAYER);
-      canvas.fillRect(chartElementLeftChordX, chartElementLeftChordY + Text.HEIGHT + offset,
-        Chart.ELEMENT_WIDTH, Chart.HEIGHT - offset);
+      canvas.fillRect(chartElementLeftChordX, chartElementLeftChordY + Text.HEIGHT + offset, Chart.ELEMENT_WIDTH, Chart.HEIGHT - offset);
     }
   };
 
