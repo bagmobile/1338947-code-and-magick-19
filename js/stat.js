@@ -1,6 +1,6 @@
 'use strict';
 
-window.renderStatistics = function (ctx, names, times) {
+(function (w) {
 
   var Cloud = {
     X: 100,
@@ -18,18 +18,6 @@ window.renderStatistics = function (ctx, names, times) {
     ELEMENT_WIDTH: 40,
     ELEMENT_OFFSET_WIDTH: 50,
     PLAYER: 'Вы',
-  };
-
-  var getMaxValue = function (data) {
-    var maxValue = data[0];
-    if (data.length > 1) {
-      for (var i = 1; i < data.length; i++) {
-        if (maxValue < data[i]) {
-          maxValue = data[i];
-        }
-      }
-    }
-    return Math.round(maxValue);
   };
 
   var drawCloud = function (canvas) {
@@ -62,7 +50,7 @@ window.renderStatistics = function (ctx, names, times) {
   };
 
   var drawChart = function (canvas, listNames, listTimes) {
-    var maxTimeValue = getMaxValue(times);
+    var maxTimeValue = window.mathUtil.getMaxValue(listTimes);
 
     for (var i = 0; i < listNames.length; i++) {
       var time = Math.round(listTimes[i]);
@@ -84,9 +72,11 @@ window.renderStatistics = function (ctx, names, times) {
     }
   };
 
-  if ((names.length !== 0) && times.length !== 0) {
-    drawCloud(ctx);
-    drawText(ctx);
-    drawChart(ctx, names, times);
-  }
-};
+  w.renderStatistics = function (ctx, names, times) {
+    if ((names.length !== 0) && times.length !== 0) {
+      drawCloud(ctx);
+      drawText(ctx);
+      drawChart(ctx, names, times);
+    }
+  };
+})(window);
