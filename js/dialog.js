@@ -34,6 +34,7 @@
   var setupWizardEyes = document.querySelector('.setup-wizard .wizard-eyes');
   var setupFireball = document.querySelector('.setup-fireball-wrap');
   var dialogHandler = setupDialogElement.querySelector('.upload');
+  var dialogForm = setupDialogElement.querySelector('form');
   var initChordsSetupDialogElement = {
     x: setupDialogElement.offsetLeft,
     y: setupDialogElement.offsetTop,
@@ -136,6 +137,17 @@
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+  });
+
+  dialogForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    var onSave = function () {
+      window.domUtil.insertSucceessMessage('Данные успешно отправлены');
+    };
+    var onError = function (message) {
+      window.domUtil.insertErrorMessage(message);
+    };
+    window.backend.save(new FormData(dialogForm), onSave, onError);
   });
 
 
