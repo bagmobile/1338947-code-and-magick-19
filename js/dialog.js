@@ -74,22 +74,33 @@
     window.domUtil.isEnterEvent(evt, closePopup);
   });
 
+  var getFilter = function () {
+    return {
+      'coatColor': document.querySelector('input[name="coat-color"]').value,
+      'eyesColor': document.querySelector('input[name="eyes-color"]').value,
+      'fireballColor': document.querySelector('input[name="fireball-color"]').value,
+    };
+  };
+
   setupWizardCoat.addEventListener('click', function (evt) {
     var color = wizardCoatColors[window.mathUtil.generateRandomValue(wizardCoatColors.length)];
     evt.target.style.fill = color;
     document.querySelector('input[name="coat-color"]').value = color;
+    window.setup.filterWizards(getFilter());
   });
 
   setupWizardEyes.addEventListener('click', function (evt) {
     var color = wizardEyesColors[window.mathUtil.generateRandomValue(wizardEyesColors.length)];
     evt.target.style.fill = color;
     document.querySelector('input[name="eyes-color"]').value = color;
+    window.setup.filterWizards(getFilter());
   });
 
   setupFireball.addEventListener('click', function (evt) {
     var color = fireballColors[window.mathUtil.generateRandomValue(fireballColors.length)];
     evt.currentTarget.style.background = color;
     evt.currentTarget.querySelector('input[name="fireball-color"]').value = color;
+    window.setup.filterWizards(getFilter());
   });
 
   dialogHandler.addEventListener('mousedown', function (evt) {
@@ -150,5 +161,20 @@
     window.backend.save(new FormData(dialogForm), onSave, onError);
   });
 
+  var updateColors = function (data) {
+    wizardCoatColors = data.map(function (element) {
+      return element.colorCoat;
+    });
+    wizardEyesColors = data.map(function (element) {
+      return element.colorEyes;
+    });
+    fireballColors = data.map(function (element) {
+      return element.colorFireball;
+    });
+  };
+
+  window.dialog = {
+    updateColors: updateColors,
+  };
 
 })();
