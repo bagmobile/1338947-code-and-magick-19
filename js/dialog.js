@@ -173,6 +173,19 @@
     });
   };
 
+  dialogHandler.querySelector('input').addEventListener('change', function (evt) {
+    var file = evt.target.files[0];
+    if (file) {
+      var reader = new FileReader();
+
+      reader.addEventListener('load', function () {
+        document.querySelector('.setup-user-pic').src = reader.result;
+      });
+
+      reader.readAsDataURL(file);
+    }
+  });
+
   window.dialog = {
     updateColors: updateColors,
   };
